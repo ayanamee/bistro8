@@ -1,0 +1,7 @@
+My first Pico-8 endeavor is a clone of the well known cellular automaton slash zero-player game Conway's Game of Life. 
+I chose to remake Game of Life, because I thought the pixel-perfect nature of Pico-8 lends itself very nicely to systems represented by grids. 
+It also has very simple rules, I didn't need fancy data structures or algorithms nor any familiarity with Lua.
+It's fun to mess around for a while, the chaotic chain reactions mesmerize me.
+
+X - Populates/Depopulates a cell
+Z - Runs/Stops simulation
