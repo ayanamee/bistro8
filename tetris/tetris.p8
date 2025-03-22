@@ -1,0 +1,92 @@
+pico-8 cartridge // http://www.pico-8.com
+version 42
+__lua__
+#include tetrislib.lua
+
+--board variables
+h = 20*4
+w = 10*4
+thickness=2
+bx0= 1
+by0= 1
+x0= bx0+thickness
+y0= by0+thickness
+--tetromino variables
+speed = 1
+current_tet = {}
+
+--gravity
+gravity_buffer = 0
+default_g_force = 2
+high_g = 30
+g_force = default_g_force
+
+--Game States
+running = 0
+
+function _init()
+    init_tetrominoes()
+    current_tet = tet_list[6]
+    current_tet.x = x0+w/2
+    current_tet.y = y0+1
+    running = 1
+end
+
+function _update()
+    player_input()
+    current_tet:gravity(g_force)
+    current_tet.y = current_tet.y%(by0+2*thickness+h)
+end
+
+function _draw()
+    cls()
+    if running then
+        draw_board(thickness,2)
+        current_tet:draw()
+    end
+end
+
+function draw_board(t,c) --t is thickness, c is color
+ 	rectfill(bx0,by0,bx0+2*t+w,by0+t,c) --upper bar
+ 	rectfill(bx0,by0+t+h,bx0+2*t+w,by0+2*t+h,c) --lower bar
+ 	rectfill(bx0,by0+t,bx0+t,by0+t+h,c) --left bar
+ 	rectfill(bx0+t+w,by0+t,bx0+2*t+w,by0+t+h,c) --right bar
+    rect(0,0,127,127,7)
+end
+
+function player_input()
+
+	if btn(⬇️) then
+        g_force=high_g
+    else
+        g_force=default_g_force
+    end
+
+	if btnp(⬆️) then
+		--up
+    end
+		
+	if btn(➡️) then current_tet:move(4, bx0+thickness, bx0+thickness+w) end
+	if btn(⬅️) then current_tet:move(-4,bx0+thickness, bx0+thickness+w) end
+	if btnp(4) then
+        --z
+    end
+	if btnp(5) then
+		--x
+	end
+
+end
+
+__gfx__
+00000000eeeeeeeeeeee0000aaaaaaaa0000000000001111000000009999000000000000cccccccccccccccc0000bbbbbbbb0000888888880000000000000000
+00000000eeeeeeeeeeee0000aaaaaaaa0000000000001111000000009999000000000000cccccccccccccccc0000bbbbbbbb0000888888880000000000000000
+00700700eeeeeeeeeeee0000aaaaaaaa0000000000001111000000009999000000000000cccccccccccccccc0000bbbbbbbb0000888888880000000000000000
+00077000eeeeeeeeeeee0000aaaaaaaa0000000000001111000000009999000000000000cccccccccccccccc0000bbbbbbbb0000888888880000000000000000
+000770000000eeee00000000aaaaaaaa00000000000011110000000099990000000000000000000000000000bbbbbbbb00000000000088888888000000000000
+007007000000eeee00000000aaaaaaaa00000000000011110000000099990000000000000000000000000000bbbbbbbb00000000000088888888000000000000
+000000000000eeee00000000aaaaaaaa00000000000011110000000099990000000000000000000000000000bbbbbbbb00000000000088888888000000000000
+000000000000eeee00000000aaaaaaaa00000000000011110000000099990000000000000000000000000000bbbbbbbb00000000000088888888000000000000
+00000000000000000000000000000000000000001111111100000000999999990000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000001111111100000000999999990000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000001111111100000000999999990000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000001111111100000000999999990000000000000000000000000000000000000000000000000000000000000000
