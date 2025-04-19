@@ -2,7 +2,7 @@
 --board variables
 h = 20*4
 w = 10*4
-thickness=2
+thickness=3
 bx0= 1
 by0= 1
 x0= bx0+thickness
@@ -25,7 +25,7 @@ running = 0
 
 board = {}
 
-Tetromino = {sprite = 0, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1} 
+Tetromino = {sprite = 0, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
 Tetromino.__index = Tetromino
 
 
@@ -33,16 +33,23 @@ function init_board()
     for i=1, 20 do
         board[i]={}
         for j=1, 10 do
-            board[i][j] = {full = 0, x=x0+4*(j-1),y=y0+4*(i-1)}
+            board[i][j] = {full = 0, x=x0+4*(j-1),y=y0+4*(i-1), color = 0}
         end
     end
 end
 
 function draw_board()
+    local c = 0
     for i=1, 20 do
         for j=1, 10 do
-            --rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y,  5+ (i+j)%2)
-            rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y, 1+ board[i][j].full)
+            if board[i][j].full == 1 then
+                c = board[i][j].color
+            else
+                c =0 + ((i+j)%2)*5
+            end
+
+            rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y,  c)
+            --rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y, 1+ board[i][j].full)
         
         end
     end
@@ -63,33 +70,64 @@ function Tetromino:new(o)
     return o
 end
 
+function Tetromino:new_I()
+    local I = Tetromino:new({name = "I", sprite = 9, 
+    shape={ {1,1}, {1,2}, {1,3}, {1,4} }, color=12})
+    return I
+end
+
+function Tetromino:new_O()
+    O = Tetromino:new({name = "O", sprite = 3,
+    shape={ {1,1}, {1,2}, {2,1}, {2,2} }, color=10})
+    return O
+end
+
+function Tetromino:new_J()
+    J = Tetromino:new({name = "J", sprite = 5,
+    shape={ {1,1}, {2,1}, {2,2}, {2,3} }, color=1})
+    return J
+end
+
+function Tetromino:new_L()
+    L = Tetromino:new({name = "L", sprite = 7,
+    shape={ {1,3}, {2,1}, {2,2}, {2,3} }, color=9})
+    return L
+end
+
+function Tetromino:new_S()
+    S = Tetromino:new({name = "S", sprite = 11,
+    shape={ {1,2}, {1,3}, {2,1}, {2,2} }, color=11})
+    return S
+end
+
+function Tetromino:new_Z()
+    Z = Tetromino:new({name = "Z", sprite = 13,
+    shape={ {1,1}, {1,2}, {2,2}, {2,3} }, color=8})
+    return Z
+end
+
+function Tetromino:new_T()
+    T = Tetromino:new({name = "T", sprite = 1,
+    shape={ {1,2}, {2,1}, {2,2}, {2,3} }, color=14})
+    return T
+end
+
+
+
 function init_tetrominoes()
 
     Tetromino.__index = Tetromino
 
-    I = Tetromino:new({name = "I", sprite = 9, 
-    shape={ {1,1}, {1,2}, {1,3}, {1,4}  }})
-
-    O = Tetromino:new({name = "O", sprite = 3,
-    shape={ {1,1}, {1,2}, {2,1}, {2,2} }})
-
-    J = Tetromino:new({name = "J", sprite = 5,
-    shape={ {1,1}, {2,1}, {2,2}, {2,3} }})
-
-    L = Tetromino:new({name = "L", sprite = 7,
-    shape={ {1,3}, {2,1}, {2,2}, {2,3} }})
-
-    S = Tetromino:new({name = "S", sprite = 13,
-    shape={ {1,2}, {1,3}, {2,1}, {2,2} }})
-
-    Z = Tetromino:new({name = "Z", sprite = 11,
-    shape={ {1,1}, {1,2}, {2,2}, {2,3} }})
-
-    T = Tetromino:new({name = "T", sprite = 1,
-    shape={ {1,2}, {2,1}, {2,2}, {2,3} }})
 
     
-    tet_list = {index=1, I, O, J, L, S, Z, T}
+    tet_list = {index=2, count=7}
+    
+    insert_tet(tet_list)
+    insert_tet(tet_list)
+    insert_tet(tet_list)
+    insert_tet(tet_list)
+
+
     dead_tets = {}
 end
 
@@ -101,7 +139,13 @@ end
 function Tetromino:draw()
     --spr(self.sprite, self.x, self.y, 2, 2, self.flipx , self.flipy)
     spr(self.sprite, self.x, board[self.idy][self.idx].y, 2, 2, self.flipx , self.flipy)
-    print(self.idy, 0,0, 12)
+    -- for i=1, 4 do
+    --     a = self.shape[i][2] - 1 + self.x
+    --     b = self.shape[i][1] - 1 + board[self.idy][self.idx].y
+
+    --     pset(a,b, 15)
+    -- end
+
 end
 
 function Tetromino:move(amount, left_bound, right_bound)
@@ -141,9 +185,9 @@ function Tetromino:gravity(force, lower_bound)
     if self.alive==1 then
         gravity_buffer+=force
         if(gravity_buffer>30) then
-            if self.idy == 19 or self:check_collision(self.idx, self.idy+1) then
+            if self.idy == 20 or self:check_collision(self.idx, self.idy+1) then
                 self:kill_tet()
-                current_tet=pop_tetromino(tet_list)
+                current_tet=pop_tet(tet_list)
             else
                 self.idy +=1
                 gravity_buffer=0
@@ -153,17 +197,37 @@ function Tetromino:gravity(force, lower_bound)
 end
 
 function Tetromino:kill_tet()
-    self.alive =0
+    self.alive = 0
     add(dead_tets, self)
     for i=1, 4 do
         local a = self.shape[i][2] + self.idx - 1
         local b = self.shape[i][1] + self.idy - 1
         board[b][a].full = 1
+        board[b][a].color = self.color
     end
 end
 
+function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index]
 
-function pop_tetromino(tet_list)
+    local index = tet_list.count + 2
+    local rd = flr(rnd(2))
+    local t
+
+    if rd == 0 then t = Tetromino:new_I()
+    elseif rd == 1 then t = Tetromino:new_O() 
+    elseif rd == 2 then t = Tetromino:new_J() 
+    elseif rd == 3 then t = Tetromino:new_L() 
+    elseif rd == 4 then t = Tetromino:new_S() 
+    elseif rd == 5 then t = Tetromino:new_Z() 
+    elseif rd == 6 then t = Tetromino:new_T() end
+
+    add(tet_list, t)
+    tet_list.count +=1
+end
+
+
+function pop_tet(tet_list)  -- inserts + pops a tet from the list
+    insert_tet(tet_list)
     if tet_list[tet_list.index]!=0 then
         tet_list.index+=1
         var = tet_list[tet_list.index]
@@ -192,16 +256,24 @@ function Tetromino:spawn_tet()
 
 end
 
-function update_board()
+function clear_row(row)
 
+    for j=1, 10 do
+        board[row][j].full = board[row-1][j].full
+        board[row][j].color= board[row-1][j].color
+    end
+end
+
+function update_board()
     for i=1, 20 do
+        local aux = 0
         for j=1, 10 do
-            local x = board[i][j].x
-            local y = board[i][j].y
-            c = pget(x,y)
-            if c != 0 and board[i][j].full !=2 then
-                board[i][j].full = 1
+            if board[i][j].full == 1 then
+                aux+=1
             end
+        end
+        if aux == 10 then
+            clear_row(10)
         end
     end
 
