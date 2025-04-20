@@ -196,15 +196,40 @@ function Tetromino:gravity(force, lower_bound)
     end
 end
 
+function check_rows(rows)
+    local aux = 0
+
+    rows_to_clear = {}
+    n=0
+
+    for r in rows do
+        for c=1, 10 do
+            if board[r][c].full == 1 then
+                aux+=1
+            end
+        end
+        if aux == 10 then
+            add(rows_to_clear,r)
+            n+=1
+        end
+    end
+    if n>0 then
+        clear_rows(rows_to_clear,n)
+    end
+end
+
 function Tetromino:kill_tet()
     self.alive = 0
     add(dead_tets, self)
-    for i=1, 4 do
+    rows={}
+    for i=4,1,-1  do
         local a = self.shape[i][2] + self.idx - 1
         local b = self.shape[i][1] + self.idy - 1
         board[b][a].full = 1
         board[b][a].color = self.color
+        add(rows,b)
     end
+    check_rows(rows)
 end
 
 function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index]
@@ -256,27 +281,20 @@ function Tetromino:spawn_tet()
 
 end
 
-function clear_row(row)
-
-    for j=1, 10 do
-        board[row][j].full = board[row-1][j].full
-        board[row][j].color= board[row-1][j].color
+function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear das ultimas N linhas
+    last_row = rows[1]
+    for r=last_row,1,-1 do
+        for j=1, 10 do
+            board[r][j].full = board[r-n][j].full
+            board[r][j].color= board[r-n][j].color
+        end
     end
 end
 
 function update_board()
-    for i=1, 20 do
-        local aux = 0
-        for j=1, 10 do
-            if board[i][j].full == 1 then
-                aux+=1
-            end
-        end
-        if aux == 10 then
-            clear_row(10)
-        end
+    for i=1,20 do
+        --check_rows(i)
     end
-
 end
 
 function Tetromino:check_collision(new_idx, new_idy)

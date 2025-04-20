@@ -18,7 +18,7 @@ function _update()
     if running then
         player_input()
         current_tet:gravity(g_force,y0+h)
-        update_board()
+        --update_board()
     end
     --current_tet.y = current_tet.y%(by0+2*thickness+h)
 end
