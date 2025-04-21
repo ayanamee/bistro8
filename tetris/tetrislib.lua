@@ -28,6 +28,9 @@ board = {}
 Tetromino = {sprite = 0, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
 Tetromino.__index = Tetromino
 
+function log(text, ow)
+    printh(text, "log", ow)
+end
 
 function init_board()
     for i=1, 20 do
@@ -197,12 +200,14 @@ function Tetromino:gravity(force, lower_bound)
 end
 
 function check_rows(rows)
+
     local aux = 0
 
     rows_to_clear = {}
     n=0
 
-    for r in rows do
+    for i,r in pairs(rows) do
+        log(r,false)
         for c=1, 10 do
             if board[r][c].full == 1 then
                 aux+=1
@@ -212,10 +217,21 @@ function check_rows(rows)
             add(rows_to_clear,r)
             n+=1
         end
+        aux=0
     end
+
     if n>0 then
         clear_rows(rows_to_clear,n)
     end
+end
+
+function contains(table,value)
+    for _,v in pairs(table) do
+        if(v==value) then
+            return true
+        end
+    end
+    return false
 end
 
 function Tetromino:kill_tet()
@@ -227,7 +243,7 @@ function Tetromino:kill_tet()
         local b = self.shape[i][1] + self.idy - 1
         board[b][a].full = 1
         board[b][a].color = self.color
-        add(rows,b)
+        if not contains(rows,b) then add(rows,b) end
     end
     check_rows(rows)
 end
@@ -283,10 +299,18 @@ end
 
 function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear das ultimas N linhas
     last_row = rows[1]
-    for r=last_row,1,-1 do
+    log("last row is "..last_row.."", false)
+    log("n is "..n.."", false)
+    for r=last_row,n+1,-1 do
         for j=1, 10 do
             board[r][j].full = board[r-n][j].full
             board[r][j].color= board[r-n][j].color
+        end
+    end
+    for rn=n, 1,-1 do
+        for j=1, 10 do
+            board[rn][j].full = 0
+            board[rn][j].color= 0 
         end
     end
 end
