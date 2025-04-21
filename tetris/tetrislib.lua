@@ -16,11 +16,28 @@ current_tet = {}
 
 --gravity
 gravity_buffer = 0
-default_g_force = 2
-high_g = 30
+default_g_force = 1
+high_g = 31
 g_force = default_g_force
 
+right_buffer=0
+right_force=6
+left_buffer=0
+left_force=6
+buffer_limit=10
+
+das_buffer = 0
+das_limit = 3
+das_force = 4
+
+das=5
+arr=1
+
+--animations
+clear_anim={clearing=false, frames=0, }
+
 --Game States
+g_frames=0
 running = 0
 
 board = {}
@@ -31,6 +48,7 @@ Tetromino.__index = Tetromino
 function log(text, ow)
     printh(text, "log", ow)
 end
+
 
 function init_board()
     for i=1, 20 do
@@ -151,15 +169,45 @@ function Tetromino:draw()
 
 end
 
-function Tetromino:move(amount, left_bound, right_bound)
-    if self.alive==1 then
-        if self.x+amount<=right_bound and self.x+amount>=left_bound then
-            self.x += amount
-            
-        end
-    end
-    --check for collision etc
-end
+-- function Tetromino:move_right(amount, right_bound)
+--     left_buffer=0
+--     das_buffer+=das_force
+--     if(das_buffer>das_limit) then
+--         if self.alive==1 then
+--             if self.x+amount<=right_bound then
+--                 right_buffer+=right_force
+--                 if(right_buffer>buffer_limit) then
+--                     if not self:check_collision(self.idx+1, self.idy) then
+--                         self.x += amount
+--                         self.idx +=1
+--                         right_buffer=0
+--                     end
+--                 end
+--             end
+--         end
+--         das_buffer=0
+--     end
+-- end
+
+-- function Tetromino:move_left(amount, left_bound)
+--     right_buffer=0
+--     das_buffer+=das_force
+--     if(das_buffer>das_limit) then
+--         if self.alive==1 then
+--             if self.x+amount>=left_bound then
+--                 left_buffer+=left_force
+--                 if(left_buffer>buffer_limit) then
+--                     if not self:check_collision(self.idx-1, self.idy) then
+--                         self.x += amount
+--                         self.idx -=1
+--                         left_buffer=0
+--                     end
+--                 end
+--             end
+--         end
+--         das_buffer=0
+--     end
+-- end
 
 function Tetromino:move_right(amount, right_bound)
     if self.alive==1 then
@@ -182,7 +230,6 @@ function Tetromino:move_left(amount, left_bound)
         end
     end
 end
-
 
 function Tetromino:gravity(force, lower_bound)
     if self.alive==1 then
@@ -301,6 +348,7 @@ function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear
     last_row = rows[1]
     log("last row is "..last_row.."", false)
     log("n is "..n.."", false)
+    --send last row and n to global variables to animate
     for r=last_row,n+1,-1 do
         for j=1, 10 do
             board[r][j].full = board[r-n][j].full

@@ -7,7 +7,7 @@ __lua__
 
 function _init()
     pokes()
-			 --	music(0,1000) 
+	--	music(0,1000) 
     init_board()
     init_tetrominoes()
     current_tet = pop_tet(tet_list)
@@ -18,22 +18,18 @@ function _update()
     if running then
         player_input()
         current_tet:gravity(g_force,y0+h)
-        --update_board()
     end
-    --current_tet.y = current_tet.y%(by0+2*thickness+h)
 end
 
 function _draw()
     cls()
     if running then
+        g_frames +=1
         draw_borders(thickness,7)
         draw_board()
-        --draw_dead_tets()
         current_tet:draw()
-        print(current_tet.x,80,80,9)
-        print(a,100,1,2)
-        print(b,100,5,2)
-
+        if clear_anim.clearing then anim_clear() end
+        if g_frames==30 then g_frames=0 end
     end
 end
 
@@ -53,8 +49,8 @@ function player_input()
             --up
         end
             
-        if btn(➡️) then current_tet:move_right(4, 40) end
-        if btn(⬅️) then current_tet:move_left(-4,-10) end
+        if btnp(➡️) then current_tet:move_right(4, 40) end
+        if btnp(⬅️) then current_tet:move_left(-4,-10) end
         if btnp(4) then
             --z
         end
@@ -67,8 +63,8 @@ function player_input()
             --up
         end
             
-        if btn(➡️) then current_tet:move_right(4, 40) end
-        if btn(⬅️) then current_tet:move_left(-4,-10) end
+        if btnp(➡️) then current_tet:move_right(4, 40) end
+        if btnp(⬅️) then current_tet:move_left(-4,-10) end
         if btnp(4) then
             --z
         end
@@ -82,7 +78,8 @@ function player_input()
 end
 
 function pokes()
-    poke(0X5F5C, 255) 
+    poke(0X5F5C, das) 
+    poke(0X5F5D, arr) 
 end
 
 __gfx__
