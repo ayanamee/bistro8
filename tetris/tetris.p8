@@ -27,7 +27,7 @@ function _draw()
         g_frames +=1
         draw_borders(thickness,7)
         draw_board()
-        current_tet:draw()
+        current_tet:draw_tet()
         if clear_anim.clearing then anim_clear() end
         if g_frames==30 then g_frames=0 end
     end
@@ -65,12 +65,9 @@ function player_input()
             
         if btnp(➡️) then current_tet:move_right(4, 40) end
         if btnp(⬅️) then current_tet:move_left(-4,-10) end
-        if btnp(4) then
-            --z
-        end
-        if btnp(5) then
-            --x
-        end
+        if btnp(4) then current_tet:rotate(false) end         
+        if btnp(5) then current_tet:rotate(true) end
+
     end
 
 

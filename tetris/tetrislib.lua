@@ -42,7 +42,7 @@ running = 0
 
 board = {}
 
-Tetromino = {sprite = 0, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
+Tetromino = {sprite = 0, cs=1, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
 Tetromino.__index = Tetromino
 
 function log(text, ow)
@@ -82,6 +82,7 @@ end
 function Tetromino:new(o)
     o = o or {}
     setmetatable(o, self)
+    o.cs=1
     o.rotation=1
     o.idx=1
     o.idy=1
@@ -93,43 +94,71 @@ end
 
 function Tetromino:new_I()
     local I = Tetromino:new({name = "I", sprite = 9, 
-    shape={ {1,1}, {1,2}, {1,3}, {1,4} }, color=12})
+    shape={ {{2,1}, {2,2}, {2,3}, {2,4}},
+            {{1,3}, {2,3}, {3,3}, {4,3}},
+            {{3,1}, {3,2}, {3,3}, {3,4}},
+            {{1,2}, {2,2}, {3,2}, {4,2}},
+            }, color=12})
     return I
 end
 
 function Tetromino:new_O()
     O = Tetromino:new({name = "O", sprite = 3,
-    shape={ {1,1}, {1,2}, {2,1}, {2,2} }, color=10})
+    shape={ {{1,2}, {1,3}, {2,2}, {2,3}},
+            {{1,2}, {1,3}, {2,2}, {2,3}},
+            {{1,2}, {1,3}, {2,2}, {2,3}},
+            {{1,2}, {1,3}, {2,2}, {2,3}},
+            }, color=10})
     return O
 end
 
 function Tetromino:new_J()
     J = Tetromino:new({name = "J", sprite = 5,
-    shape={ {1,1}, {2,1}, {2,2}, {2,3} }, color=1})
+    shape={ {{1,1}, {2,1}, {2,2}, {2,3}},
+            {{1,2}, {1,3}, {2,2}, {3,2}},
+            {{2,1}, {2,2}, {2,3}, {3,3}},
+            {{1,2}, {2,2}, {3,2}, {3,1}},  
+            }, color=1})
     return J
 end
 
 function Tetromino:new_L()
     L = Tetromino:new({name = "L", sprite = 7,
-    shape={ {1,3}, {2,1}, {2,2}, {2,3} }, color=9})
+    shape={ {{1,3}, {2,1}, {2,2}, {2,3}},
+            {{1,2}, {2,2}, {3,2}, {3,3}},
+            {{2,1}, {2,2}, {2,3}, {3,1}},
+            {{1,1}, {1,2}, {2,2}, {3,2}},      
+            }, color=9})
     return L
 end
 
 function Tetromino:new_S()
     S = Tetromino:new({name = "S", sprite = 11,
-    shape={ {1,2}, {1,3}, {2,1}, {2,2} }, color=11})
+    shape={ {{1,2}, {1,3}, {2,1}, {2,2}},
+            {{1,2}, {2,2}, {2,3}, {3,3}},
+            {{2,2}, {2,3}, {3,1}, {3,2}},
+            {{1,1}, {2,1}, {2,2}, {3,2}},  
+            }, color=11})
     return S
 end
 
 function Tetromino:new_Z()
     Z = Tetromino:new({name = "Z", sprite = 13,
-    shape={ {1,1}, {1,2}, {2,2}, {2,3} }, color=8})
+    shape={ {{1,1}, {1,2}, {2,2}, {2,3}},
+            {{1,3}, {2,2}, {2,3}, {3,2}},
+            {{2,1}, {2,2}, {3,2}, {3,3}},
+            {{1,2}, {2,1}, {2,2}, {3,1}}, 
+         }, color=8})
     return Z
 end
 
 function Tetromino:new_T()
     T = Tetromino:new({name = "T", sprite = 1,
-    shape={ {1,2}, {2,1}, {2,2}, {2,3} }, color=14})
+    shape={ {{1,2}, {2,1}, {2,2}, {2,3}},
+            {{1,2}, {2,2}, {3,2}, {2,3}},
+            {{2,1}, {2,2}, {2,3}, {3,2}},
+            {{1,2}, {2,1}, {2,2}, {3,2}}, 
+         }, color=14})
     return T
 end
 
@@ -169,50 +198,23 @@ function Tetromino:draw()
 
 end
 
--- function Tetromino:move_right(amount, right_bound)
---     left_buffer=0
---     das_buffer+=das_force
---     if(das_buffer>das_limit) then
---         if self.alive==1 then
---             if self.x+amount<=right_bound then
---                 right_buffer+=right_force
---                 if(right_buffer>buffer_limit) then
---                     if not self:check_collision(self.idx+1, self.idy) then
---                         self.x += amount
---                         self.idx +=1
---                         right_buffer=0
---                     end
---                 end
---             end
---         end
---         das_buffer=0
---     end
--- end
+function Tetromino:draw_tet()
+    local a, b, xx, yy
+    for i=1, 4 do
+        a = self.shape[self.cs][i][2] + self.idx - 1
+        b = self.shape[self.cs][i][1] + self.idy - 1 
 
--- function Tetromino:move_left(amount, left_bound)
---     right_buffer=0
---     das_buffer+=das_force
---     if(das_buffer>das_limit) then
---         if self.alive==1 then
---             if self.x+amount>=left_bound then
---                 left_buffer+=left_force
---                 if(left_buffer>buffer_limit) then
---                     if not self:check_collision(self.idx-1, self.idy) then
---                         self.x += amount
---                         self.idx -=1
---                         left_buffer=0
---                     end
---                 end
---             end
---         end
---         das_buffer=0
---     end
--- end
+        xx = board[b][a].x
+        yy = board[b][a].y
+
+        rectfill(xx,yy,xx+3,yy+3,self.color)
+    end
+end
 
 function Tetromino:move_right(amount, right_bound)
     if self.alive==1 then
         if self.x+amount<=right_bound then
-            if not self:check_collision(self.idx+1, self.idy) then
+            if not self:check_collision(self.cs, self.idx+1, self.idy) then
                 self.x += amount
                 self.idx +=1
             end
@@ -223,7 +225,7 @@ end
 function Tetromino:move_left(amount, left_bound)
     if self.alive==1 then
         if self.x+amount>=left_bound then
-            if not self:check_collision(self.idx-1, self.idy) then
+            if not self:check_collision(self.cs,self.idx-1, self.idy) then
                 self.x += amount
                 self.idx -=1
             end
@@ -231,11 +233,28 @@ function Tetromino:move_left(amount, left_bound)
     end
 end
 
+function Tetromino:rotate(clockwise)
+    local aux
+    if clockwise then aux=1 else aux=-1 end
+    next_rot = (self.cs+aux)%4
+
+    if self.alive == 1 then
+        if not self:check_collision(next_rot, self.idx, self.idy) then
+            self.cs= next_rot
+        end
+    end
+
+end
+
+
+
+
+
 function Tetromino:gravity(force, lower_bound)
     if self.alive==1 then
         gravity_buffer+=force
         if(gravity_buffer>30) then
-            if self.idy == 20 or self:check_collision(self.idx, self.idy+1) then
+            if self.idy == 20 or self:check_collision(self.cs,self.idx, self.idy+1) then
                 self:kill_tet()
                 current_tet=pop_tet(tet_list)
             else
@@ -286,8 +305,8 @@ function Tetromino:kill_tet()
     add(dead_tets, self)
     rows={}
     for i=4,1,-1  do
-        local a = self.shape[i][2] + self.idx - 1
-        local b = self.shape[i][1] + self.idy - 1
+        local a = self.shape[self.cs][i][2] + self.idx - 1
+        local b = self.shape[self.cs][i][1] + self.idy - 1
         board[b][a].full = 1
         board[b][a].color = self.color
         if not contains(rows,b) then add(rows,b) end
@@ -337,8 +356,8 @@ end
 function Tetromino:spawn_tet()
 
     for i=1, 4 do
-        local a = self.shape[i][1]
-        local b = self.shape[i][2]
+        local a = self.shape[self.cs][i][1]
+        local b = self.shape[self.cs][i][2]
         --board[a][b].full = 2
     end
 
@@ -369,10 +388,10 @@ function update_board()
     end
 end
 
-function Tetromino:check_collision(new_idx, new_idy)
+function Tetromino:check_collision(cs, new_idx, new_idy)
     for i=1, 4 do
-        a = self.shape[i][2] + new_idx - 1
-        b = self.shape[i][1] + new_idy - 1 
+        a = self.shape[cs][i][2] + new_idx - 1
+        b = self.shape[cs][i][1] + new_idy - 1 
 
         if b < 1 or b > 20 or a < 1 or a > 10 then
             return true 
