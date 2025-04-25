@@ -3,8 +3,8 @@
 h = 20*4
 w = 10*4
 thickness=3
-bx0= 1
-by0= 1
+bx0= 40
+by0= 10
 x0= bx0+thickness
 y0= by0+thickness
 
@@ -51,7 +51,7 @@ end
 
 
 function init_board()
-    for i=1, 20 do
+    for i=-3, 20,1 do
         board[i]={}
         for j=1, 10 do
             board[i][j] = {full = 0, x=x0+4*(j-1),y=y0+4*(i-1), color = 0}
@@ -59,14 +59,15 @@ function init_board()
     end
 end
 
-function draw_board()
+function draw_board(game_over)
     local c = 0
     for i=1, 20 do
         for j=1, 10 do
             if board[i][j].full == 1 then
                 c = board[i][j].color
+                if game_over then c=13 end
             else
-                c =0 + ((i+j)%2)*5
+                c = 0 + ((i+j)%2)*5
             end
 
             rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y,  c)
@@ -93,12 +94,14 @@ function Tetromino:new(o)
 end
 
 function Tetromino:new_I()
-    local I = Tetromino:new({name = "I", sprite = 9, 
+    local I = Tetromino:new({name = "I", sprite = 9,
     shape={ {{2,1}, {2,2}, {2,3}, {2,4}},
             {{1,3}, {2,3}, {3,3}, {4,3}},
             {{3,1}, {3,2}, {3,3}, {3,4}},
             {{1,2}, {2,2}, {3,2}, {4,2}},
             }, color=12})
+    I.idx = 4
+    I.idy = 0
     return I
 end
 
@@ -109,6 +112,8 @@ function Tetromino:new_O()
             {{1,2}, {1,3}, {2,2}, {2,3}},
             {{1,2}, {1,3}, {2,2}, {2,3}},
             }, color=10})
+    O.idx = 4
+    O.idy = 0
     return O
 end
 
@@ -204,16 +209,18 @@ function Tetromino:draw_tet()
         a = self.shape[self.cs][i][2] + self.idx - 1
         b = self.shape[self.cs][i][1] + self.idy - 1 
 
+        --if b < 0 then goto ignore end
         xx = board[b][a].x
         yy = board[b][a].y
 
         rectfill(xx,yy,xx+3,yy+3,self.color)
+        ::ignore::
     end
 end
 
 function Tetromino:move_right(amount, right_bound)
     if self.alive==1 then
-        if self.x+amount<=right_bound then
+        if self.idx+1<10 then
             if not self:check_collision(self.cs, self.idx+1, self.idy) then
                 self.x += amount
                 self.idx +=1
@@ -224,7 +231,7 @@ end
 
 function Tetromino:move_left(amount, left_bound)
     if self.alive==1 then
-        if self.x+amount>=left_bound then
+        if self.idx+1>1 then
             if not self:check_collision(self.cs,self.idx-1, self.idy) then
                 self.x += amount
                 self.idx -=1
@@ -234,9 +241,12 @@ function Tetromino:move_left(amount, left_bound)
 end
 
 function Tetromino:rotate(clockwise)
-    local aux
+    local aux = 0
     if clockwise then aux=1 else aux=-1 end
-    next_rot = (self.cs+aux)%4
+    next_rot = self.cs+aux
+    if next_rot == 5 then next_rot = 1 end
+    if next_rot == 0 then next_rot = 4 end
+
 
     if self.alive == 1 then
         if not self:check_collision(next_rot, self.idx, self.idy) then
@@ -256,7 +266,8 @@ function Tetromino:gravity(force, lower_bound)
         if(gravity_buffer>30) then
             if self.idy == 20 or self:check_collision(self.cs,self.idx, self.idy+1) then
                 self:kill_tet()
-                current_tet=pop_tet(tet_list)
+                if running==1 then current_tet=pop_tet(tet_list) end
+                if running==0 then return end
             else
                 self.idy +=1
                 gravity_buffer=0
@@ -273,7 +284,6 @@ function check_rows(rows)
     n=0
 
     for i,r in pairs(rows) do
-        log(r,false)
         for c=1, 10 do
             if board[r][c].full == 1 then
                 aux+=1
@@ -309,6 +319,12 @@ function Tetromino:kill_tet()
         local b = self.shape[self.cs][i][1] + self.idy - 1
         board[b][a].full = 1
         board[b][a].color = self.color
+        if b<=0 then 
+            running=0 
+            log("game over")
+            log(running)
+            return
+        end
         if not contains(rows,b) then add(rows,b) end
     end
     check_rows(rows)
@@ -338,7 +354,6 @@ function pop_tet(tet_list)  -- inserts + pops a tet from the list
     if tet_list[tet_list.index]!=0 then
         tet_list.index+=1
         var = tet_list[tet_list.index]
-        var:spawn_tet()
         return var
     end
 end
@@ -353,20 +368,10 @@ function draw_dead_tets()
     end 
 end
 
-function Tetromino:spawn_tet()
 
-    for i=1, 4 do
-        local a = self.shape[self.cs][i][1]
-        local b = self.shape[self.cs][i][2]
-        --board[a][b].full = 2
-    end
-
-end
 
 function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear das ultimas N linhas
     last_row = rows[1]
-    log("last row is "..last_row.."", false)
-    log("n is "..n.."", false)
     --send last row and n to global variables to animate
     for r=last_row,n+1,-1 do
         for j=1, 10 do
@@ -393,7 +398,7 @@ function Tetromino:check_collision(cs, new_idx, new_idy)
         a = self.shape[cs][i][2] + new_idx - 1
         b = self.shape[cs][i][1] + new_idy - 1 
 
-        if b < 1 or b > 20 or a < 1 or a > 10 then
+        if b > 20 or a < 1 or a > 10 then
             return true 
         end
 

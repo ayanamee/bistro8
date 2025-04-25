@@ -12,6 +12,7 @@ function _init()
     init_tetrominoes()
     current_tet = pop_tet(tet_list)
     running = 1
+
 end
 
 function _update()
@@ -23,14 +24,19 @@ end
 
 function _draw()
     cls()
-    if running then
+    if running==1 then
         g_frames +=1
         draw_borders(thickness,7)
-        draw_board()
+        draw_board(false)
         current_tet:draw_tet()
         if clear_anim.clearing then anim_clear() end
         if g_frames==30 then g_frames=0 end
+    elseif running==0 then
+        print("game over", bx0, by0+80+thickness+5, 10)
+        draw_borders(thickness,7)
+        draw_board(true)
     end
+
 end
 
 function draw_borders(t,c) --t is thickness, c is color
@@ -51,12 +57,9 @@ function player_input()
             
         if btnp(➡️) then current_tet:move_right(4, 40) end
         if btnp(⬅️) then current_tet:move_left(-4,-10) end
-        if btnp(4) then
-            --z
-        end
-        if btnp(5) then
-            --x
-        end
+        if btnp(4) then current_tet:rotate(false) end
+        if btnp(5) then current_tet:rotate(true)  end
+
     else
         g_force=default_g_force
         if btnp(⬆️) then
