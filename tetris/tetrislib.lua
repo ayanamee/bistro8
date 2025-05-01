@@ -40,6 +40,8 @@ clear_anim={clearing=false, frames=0, }
 g_frames=0
 running = 0
 
+total_lines = 0
+
 board = {}
 
 Tetromino = {sprite = 0, cs=1, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
@@ -220,22 +222,18 @@ end
 
 function Tetromino:move_right(amount, right_bound)
     if self.alive==1 then
-        if self.idx+1<10 then
-            if not self:check_collision(self.cs, self.idx+1, self.idy) then
-                self.x += amount
-                self.idx +=1
-            end
+        if not self:check_collision(self.cs, self.idx+1, self.idy) then
+            self.x += amount
+            self.idx +=1
         end
     end
 end
 
 function Tetromino:move_left(amount, left_bound)
     if self.alive==1 then
-        if self.idx+1>1 then
-            if not self:check_collision(self.cs,self.idx-1, self.idy) then
-                self.x += amount
-                self.idx -=1
-            end
+        if not self:check_collision(self.cs,self.idx-1, self.idy) then
+            self.x += amount
+            self.idx -=1
         end
     end
 end
@@ -333,7 +331,7 @@ end
 function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index]
 
     local index = tet_list.count + 2
-    local rd = flr(rnd(2))
+    local rd = flr(rnd(7))
     local t
 
     if rd == 0 then t = Tetromino:new_I()
@@ -371,6 +369,7 @@ end
 
 
 function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear das ultimas N linhas
+    total_lines += n
     last_row = rows[1]
     --send last row and n to global variables to animate
     for r=last_row,n+1,-1 do

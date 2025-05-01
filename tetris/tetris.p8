@@ -33,6 +33,7 @@ function _draw()
         if g_frames==30 then g_frames=0 end
     elseif running==0 then
         print("game over", bx0, by0+80+thickness+5, 10)
+        print("lines:"..total_lines.."", bx0, by0+80+thickness+11, 10)
         draw_borders(thickness,7)
         draw_board(true)
     end
