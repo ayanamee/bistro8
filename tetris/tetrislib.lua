@@ -1,14 +1,17 @@
 
 --board variables
-h = 20*4
-w = 10*4
-thickness=3
-bx0= 40
-by0= 10
+h = 20*6
+w = 10*6
+thickness=2
+bx0= 10
+by0= 0
 x0= bx0+thickness
 y0= by0+thickness
-
 bg_color = 0
+
+
+x_tbf = bx0 + w + 2*thickness + 4
+y_tbf = by0
 
 --tetromino variables
 speed = 1
@@ -56,25 +59,27 @@ function init_board()
     for i=-3, 20,1 do
         board[i]={}
         for j=1, 10 do
-            board[i][j] = {full = 0, x=x0+4*(j-1),y=y0+4*(i-1), color = 0}
+            board[i][j] = {full = 0, x=x0+6*(j-1),y=y0+6*(i-1), color = 0}
         end
     end
 end
 
 function draw_board(game_over)
     local c = 0
+    local c1, c2 = 0
     for i=1, 20 do
         for j=1, 10 do
             if board[i][j].full == 1 then
-                c = board[i][j].color
+                c = board[i][j].color    
                 if game_over then c=13 end
+                rectfill(board[i][j].x, board[i][j].y, board[i][j].x+5, 5+board[i][j].y, c)
             else
-                c = 0 + ((i+j)%2)*5
+                c = 0
+                c1 = (i)%2
+                c2 = (j)%2
+                if c1==1 and c2==1 then c = 5 end
+                rectfill(board[i][j].x, board[i][j].y, board[i][j].x, board[i][j].y, c)
             end
-
-            rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y,  c)
-            --rectfill(board[i][j].x, board[i][j].y, board[i][j].x+3, 3+board[i][j].y, 1+ board[i][j].full)
-        
         end
     end
 
@@ -126,6 +131,8 @@ function Tetromino:new_J()
             {{2,1}, {2,2}, {2,3}, {3,3}},
             {{1,2}, {2,2}, {3,2}, {3,1}},  
             }, color=1})
+    J.idx = 4
+    J.idy = 0
     return J
 end
 
@@ -136,6 +143,8 @@ function Tetromino:new_L()
             {{2,1}, {2,2}, {2,3}, {3,1}},
             {{1,1}, {1,2}, {2,2}, {3,2}},      
             }, color=9})
+    L.idx = 4
+    L.idy = 0
     return L
 end
 
@@ -146,6 +155,8 @@ function Tetromino:new_S()
             {{2,2}, {2,3}, {3,1}, {3,2}},
             {{1,1}, {2,1}, {2,2}, {3,2}},  
             }, color=11})
+    S.idx = 4
+    S.idy = 0
     return S
 end
 
@@ -156,6 +167,8 @@ function Tetromino:new_Z()
             {{2,1}, {2,2}, {3,2}, {3,3}},
             {{1,2}, {2,1}, {2,2}, {3,1}}, 
          }, color=8})
+    Z.idx = 4
+    Z.idy = 0
     return Z
 end
 
@@ -166,6 +179,8 @@ function Tetromino:new_T()
             {{2,1}, {2,2}, {2,3}, {3,2}},
             {{1,2}, {2,1}, {2,2}, {3,2}}, 
          }, color=14})
+    T.idx = 4
+    T.idy = 0
     return T
 end
 
@@ -211,11 +226,11 @@ function Tetromino:draw_tet()
         a = self.shape[self.cs][i][2] + self.idx - 1
         b = self.shape[self.cs][i][1] + self.idy - 1 
 
-        --if b < 0 then goto ignore end
+        if b < 0 then goto ignore end
         xx = board[b][a].x
         yy = board[b][a].y
 
-        rectfill(xx,yy,xx+3,yy+3,self.color)
+        rectfill(xx,yy,xx+5,yy+5,self.color)
         ::ignore::
     end
 end
@@ -343,6 +358,7 @@ function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index
     elseif rd == 6 then t = Tetromino:new_T() end
 
     add(tet_list, t)
+
     tet_list.count +=1
 end
 
@@ -366,6 +382,28 @@ function draw_dead_tets()
     end 
 end
 
+function draw_tet_buffer(tet_list)
+
+    local next_tet = tet_list[tet_list.index+1]
+
+    local a, b, xx, yy
+
+    --rect(x_tbf, y_tbf, x_tbf+24, y_tbf+ 18, 5)
+
+    print("next", x_tbf, y_tbf, 6)
+
+    for i=1, 4 do
+        a = next_tet.shape[1][i][2] - 1
+        b = next_tet.shape[1][i][1]
+
+        xx = x_tbf + a*6
+        yy = y_tbf + 4 + b*6
+
+        rectfill(xx,yy,xx+5,yy+5, next_tet.color)
+    end
+    --spr(next_tet.sprite, xx, yy, 2, 2)
+
+end
 
 
 function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear das ultimas N linhas
