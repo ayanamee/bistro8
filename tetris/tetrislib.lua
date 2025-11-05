@@ -193,12 +193,10 @@ function init_tetrominoes()
 
 
     
-    tet_list = {index=2, count=7}
+    tet_list = {index=2, tcount=7}
     
-    insert_tet(tet_list)
-    insert_tet(tet_list)
-    insert_tet(tet_list)
-    insert_tet(tet_list)
+    insert_tet_bag(tet_list)
+
 
 
     dead_tets = {}
@@ -313,6 +311,11 @@ function check_rows(rows)
 
     if n>0 then
         clear_rows(rows_to_clear,n)
+        if n>=4 then
+            sfx(4)
+        else
+            sfx(3)
+        end
     end
 end
 
@@ -347,7 +350,7 @@ end
 
 function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index]
 
-    local index = tet_list.count + 2
+    local index = tet_list.tcount + 2
     local rd = flr(rnd(7))
     local t
 
@@ -361,12 +364,38 @@ function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index
 
     add(tet_list, t)
 
-    tet_list.count +=1
+    tet_list.tcount +=1
 end
 
+function insert_tet_bag(tet_list)
+    local index = tet_list.tcount + 2
+    local rd
+    local t
+    local bag = {0,1,2,3,4,5,6}
+
+    for i = 6,0,1 do
+        rd = flr(rnd(7))
+        bag[i], bag[rd] = bag[rd], bag[i]
+    end
+
+    for i = 0, 6, 1 do
+        rd = bag[i]
+
+        if rd == 0 then t = Tetromino:new_I()
+        elseif rd == 1 then t = Tetromino:new_O() 
+        elseif rd == 2 then t = Tetromino:new_J() 
+        elseif rd == 3 then t = Tetromino:new_L() 
+        elseif rd == 4 then t = Tetromino:new_S() 
+        elseif rd == 5 then t = Tetromino:new_Z() 
+        elseif rd == 6 then t = Tetromino:new_T() end
+
+        add(tet_list, t)
+        tet_list.tcount +=1
+    end
+end
 
 function pop_tet(tet_list)  -- inserts + pops a tet from the list
-    insert_tet(tet_list)
+    insert_tet_bag(tet_list)
     if tet_list[tet_list.index]!=0 then
         tet_list.index+=1
         var = tet_list[tet_list.index]
