@@ -8,7 +8,7 @@ __lua__
 function _init()
     pokes()
     --srand(53)
-	--	music(0,1000) 
+	--music(0,1000) 
     init_board()
     init_tetrominoes()
     current_tet = pop_tet(tet_list)
@@ -16,16 +16,25 @@ function _init()
 
 end
 
+test = 0
 function _update()
+    test += 1
+    if (test==60) then
+        test = 0
+    end
     player_input()
+
     if running then
         current_tet:gravity(g_force,y0+h)
+
     end
 end
 
 function _draw()
     cls()
     if running==1 then
+        print(test,100,100)
+
         g_frames +=1
         --draw_borders(thickness,7)
         draw_board(false)

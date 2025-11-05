@@ -64,7 +64,7 @@ function init_board()
             board[i][j] = {full = 0, x=x0+6*(j-1),y=y0+6*(i-1), color = 0}
         end
     end
-    fill_board(5)
+    --fill_board(5)
 end
 
 function fill_board(y_limit)
@@ -122,7 +122,7 @@ function Tetromino:new_I()
             {{1,2}, {2,2}, {3,2}, {4,2}},
             }, color=12})
     I.idx = 4
-    I.idy = 0
+    I.idy = -1
     return I
 end
 
@@ -134,7 +134,7 @@ function Tetromino:new_O()
             {{1,2}, {1,3}, {2,2}, {2,3}},
             }, color=10})
     O.idx = 4
-    O.idy = 0
+    O.idy = -1
     return O
 end
 
@@ -146,7 +146,7 @@ function Tetromino:new_J()
             {{1,2}, {2,2}, {3,2}, {3,1}},  
             }, color=1})
     J.idx = 4
-    J.idy = 0
+    J.idy = -1
     return J
 end
 
@@ -158,7 +158,7 @@ function Tetromino:new_L()
             {{1,1}, {1,2}, {2,2}, {3,2}},      
             }, color=9})
     L.idx = 4
-    L.idy = 0
+    L.idy = -1
     return L
 end
 
@@ -170,7 +170,7 @@ function Tetromino:new_S()
             {{1,1}, {2,1}, {2,2}, {3,2}},  
             }, color=11})
     S.idx = 4
-    S.idy = 0
+    S.idy = -1
     return S
 end
 
@@ -182,7 +182,7 @@ function Tetromino:new_Z()
             {{1,2}, {2,1}, {2,2}, {3,1}}, 
          }, color=8})
     Z.idx = 4
-    Z.idy = 0
+    Z.idy = -1
     return Z
 end
 
@@ -194,7 +194,7 @@ function Tetromino:new_T()
             {{1,2}, {2,1}, {2,2}, {3,2}}, 
          }, color=14})
     T.idx = 4
-    T.idy = 0
+    T.idy = -1
     return T
 end
 
@@ -206,11 +206,13 @@ function init_tetrominoes()
 
 
     
-    tet_list = {index=2, tcount=0}
+    tet_list = {}
     
     insert_tet_bag(tet_list)
-
-
+    log("initial bag")
+    for i=1, #tet_list,1 do
+        log(tet_list[i].name)
+    end
 
     dead_tets = {}
 end
@@ -397,11 +399,11 @@ function Tetromino:kill_tet()
         if not contains(rows,b) then add(rows,b) end
     end
     check_rows(rows)
+    log("killed tet:"..self.name)
 end
 
 function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index]
 
-    local index = tet_list.tcount + 2
     local rd = flr(rnd(7))
     local t
 
@@ -415,18 +417,15 @@ function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index
 
     add(tet_list, t)
 
-    tet_list.tcount +=1
 end
 
 function insert_tet_bag(tet_list)
-    local index = tet_list.tcount + 2
     local rd
     local t
-    --local bag = {0,1,2,3,4,5,6}
-    local bag = {1,1,1,1,1,1,1}
+    local bag = {0,1,2,3,4,5,6}
 
     for i = 7,1,-1 do
-        rd = flr(rnd(7))
+        rd = flr(rnd(7))+1
         tmp = bag[i]
         bag[i] = bag[rd] 
         bag[rd] = tmp
@@ -443,17 +442,21 @@ function insert_tet_bag(tet_list)
         elseif rd == 6 then t = Tetromino:new_T() end
 
         add(tet_list, t)
-        tet_list.tcount +=1
     end
 end
 
 function pop_tet(tet_list)  -- inserts + pops a tet from the list
-    insert_tet_bag(tet_list)
-    if tet_list[tet_list.index]!=0 then
-        tet_list.index+=1
-        var = tet_list[tet_list.index]
-        return var
+    if (count(tet_list) <= 4) then
+        insert_tet_bag(tet_list)
     end
+    log("current bag")
+    for i=1, #tet_list do
+        log(tet_list[i].name)
+    end
+
+    var = deli(tet_list,3)
+    log("popped tet:"..var.name)
+    return var
 end
 
 function draw_dead_tets()
@@ -468,7 +471,7 @@ end
 
 function draw_tet_buffer(tet_list)
 
-    local next_tet = tet_list[tet_list.index+1]
+    local next_tet = tet_list[3]
 
     local a, b, xx, yy
 
