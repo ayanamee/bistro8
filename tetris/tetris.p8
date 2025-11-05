@@ -7,6 +7,7 @@ __lua__
 
 function _init()
     pokes()
+    --srand(53)
 	--	music(0,1000) 
     init_board()
     init_tetrominoes()
@@ -38,6 +39,7 @@ function _draw()
     elseif running==0 then
         print("game over", x_tbf, y_tbf, 7)
         print("lines:"..total_lines.."", x_tbf, y_tbf+10, 7)
+        print("restart:z/x", x_tbf, y_tbf+20, 7)
         draw_borders(thickness,7)
         draw_board(true)
     end
@@ -105,7 +107,7 @@ function player_input()
 
         end
     else
-        if btnp(4) then 
+        if btnp(4) or btnp(5) then 
             reset_board()
             init_board()
             init_tetrominoes()

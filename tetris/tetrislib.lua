@@ -64,6 +64,16 @@ function init_board()
             board[i][j] = {full = 0, x=x0+6*(j-1),y=y0+6*(i-1), color = 0}
         end
     end
+    fill_board(5)
+end
+
+function fill_board(y_limit)
+    for i=20,y_limit,-1 do
+        for j=1, 10 do
+            board[i][j].full = 1
+            board[i][j].color = 4
+        end
+    end
 end
 
 function draw_board(game_over)
@@ -196,7 +206,7 @@ function init_tetrominoes()
 
 
     
-    tet_list = {index=2, tcount=7}
+    tet_list = {index=2, tcount=0}
     
     insert_tet_bag(tet_list)
 
@@ -205,9 +215,6 @@ function init_tetrominoes()
     dead_tets = {}
 end
 
--- function Tetromino:rotate(direction) --direction to rotate 0 is CW/ 1 IS ACCW
-
--- end
 
 
 function Tetromino:draw()
@@ -241,7 +248,6 @@ end
 
 function Tetromino:draw_ghost()
     tmp_y = self.idy
-    log("y="..self.idy, true)
 
     for j = tmp_y ,19,1 do
         tmp_y = j
@@ -254,7 +260,6 @@ function Tetromino:draw_ghost()
         tmp_y = j
     end
     
-    log("tmp_y="..tmp_y)
 
     local a, b, xx, yy
     for i=1, 4 do
@@ -315,7 +320,14 @@ function Tetromino:gravity(force, lower_bound)
                 coyote_buffer+=1
                 if (coyote_buffer>=15) then
                     self:kill_tet()
-                    if running==1 then current_tet=pop_tet(tet_list) end
+                    if running==1 then 
+                        current_tet = pop_tet(tet_list)
+                        -- if current_tet:check_collision(current_tet.cs, current_tet.idx,current_tet.idy+1) then
+                        --     running = 0
+                        --     log("game over")
+                        --     return
+                        -- end
+                    end
                     if running==0 then return end
                     coyote_buffer = 0
                 end
@@ -410,16 +422,18 @@ function insert_tet_bag(tet_list)
     local index = tet_list.tcount + 2
     local rd
     local t
-    local bag = {0,1,2,3,4,5,6}
+    --local bag = {0,1,2,3,4,5,6}
+    local bag = {1,1,1,1,1,1,1}
 
-    for i = 6,0,1 do
+    for i = 7,1,-1 do
         rd = flr(rnd(7))
-        bag[i], bag[rd] = bag[rd], bag[i]
+        tmp = bag[i]
+        bag[i] = bag[rd] 
+        bag[rd] = tmp
     end
 
-    for i = 0, 6, 1 do
+    for i = 1, 7 do
         rd = bag[i]
-
         if rd == 0 then t = Tetromino:new_I()
         elseif rd == 1 then t = Tetromino:new_O() 
         elseif rd == 2 then t = Tetromino:new_J() 
