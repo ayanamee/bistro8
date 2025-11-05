@@ -16,6 +16,7 @@ y_tbf = by0
 --tetromino variables
 speed = 1
 current_tet = {}
+ghost = {}
 
 --gravity
 gravity_buffer = 0
@@ -82,6 +83,8 @@ function draw_board(game_over)
                 rectfill(board[i][j].x, board[i][j].y, board[i][j].x, board[i][j].y, c)
             end
         end
+        print(i,board[i][1].x-10,board[i][1].y,8)
+
     end
 
 end
@@ -219,6 +222,7 @@ function Tetromino:draw()
 
 end
 
+
 function Tetromino:draw_tet()
     local a, b, xx, yy
     for i=1, 4 do
@@ -233,6 +237,40 @@ function Tetromino:draw_tet()
         ::ignore::
     end
 end
+
+
+function Tetromino:draw_ghost()
+    tmp_y = self.idy
+    log("y="..self.idy, true)
+
+    for j = tmp_y ,19,1 do
+        tmp_y = j
+        if j >= 20 then
+            break
+        end
+        if self:check_collision(self.cs,self.idx,j+1) then
+            break
+        end
+        tmp_y = j
+    end
+    
+    log("tmp_y="..tmp_y)
+
+    local a, b, xx, yy
+    for i=1, 4 do
+        a = self.shape[self.cs][i][2] + self.idx - 1
+        b = self.shape[self.cs][i][1] + tmp_y - 1 
+
+        if b < 0 then goto ignore end
+        xx = board[b][a].x
+        yy = board[b][a].y
+
+        rectfill(xx,yy,xx+5,yy+5,6)
+        ::ignore::
+    end
+end
+
+
 
 function Tetromino:move_right(amount, right_bound)
     if self.alive==1 then
@@ -288,6 +326,7 @@ function Tetromino:gravity(force, lower_bound)
         end
     end
 end
+
 
 function check_rows(rows)
 
@@ -463,12 +502,6 @@ function reset_board()
         end
     end
     total_lines = 0
-end
-
-function update_board()
-    for i=1,20 do
-        --check_rows(i)
-    end
 end
 
 function Tetromino:check_collision(cs, new_idx, new_idy)
