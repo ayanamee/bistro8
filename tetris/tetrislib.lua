@@ -22,6 +22,7 @@ gravity_buffer = 0
 default_g_force = 1
 high_g = 31
 g_force = default_g_force
+coyote_buffer = 0
 
 right_buffer=0
 right_force=6
@@ -270,17 +271,18 @@ function Tetromino:rotate(clockwise)
 end
 
 
-
-
-
 function Tetromino:gravity(force, lower_bound)
     if self.alive==1 then
         gravity_buffer+=force
         if(gravity_buffer>30) then
             if self.idy == 20 or self:check_collision(self.cs,self.idx, self.idy+1) then
-                self:kill_tet()
-                if running==1 then current_tet=pop_tet(tet_list) end
-                if running==0 then return end
+                coyote_buffer+=1
+                if (coyote_buffer>=15) then
+                    self:kill_tet()
+                    if running==1 then current_tet=pop_tet(tet_list) end
+                    if running==0 then return end
+                    coyote_buffer = 0
+                end
             else
                 self.idy +=1
                 gravity_buffer=0
@@ -422,6 +424,16 @@ function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear
             board[rn][j].color= 0 
         end
     end
+end
+
+function reset_board()
+    for i=1, 20 do
+        for j=1, 10 do
+            board[i][j].full = 0
+            board[i][j].color= 0 
+        end
+    end
+    total_lines = 0
 end
 
 function update_board()
