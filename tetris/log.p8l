@@ -1,369 +1,173 @@
 initial bag
-J
-L
-T
-Z
 O
-S
-I
+O
+O
+O
+O
+O
+O
 current bag
-J
-L
-T
-Z
 O
-S
-I
-popped tet:T
-killed tet:T
+O
+O
+O
+O
+O
+O
+popped tet:O
+rotating diff
+diff x:0
+diff y:1
+rotating diff
+diff x:1
+diff y:-2
+rotating diff
+diff x:0
+diff y:1
+rotating diff
+diff x:-1
+diff y:0
+initial bag
+O
+O
+O
+O
+O
+O
+O
 current bag
-J
-L
-Z
 O
-S
-I
-popped tet:Z
-killed tet:Z
+O
+O
+O
+O
+O
+O
+popped tet:O
+initial bag
+O
+O
+O
+O
+O
+O
+O
 current bag
-J
-L
 O
-S
-I
+O
+O
+O
+O
+O
+O
+popped tet:O
+rotating diff
+diff x:0
+diff y:1
+rotating diff
+diff x:1
+diff y:0
+rotating diff
+diff x:0
+diff y:-1
+rotating diff
+diff x:-1
+diff y:0
+rotating diff
+diff x:0
+diff y:1
+rotating diff
+diff x:1
+diff y:0
+rotating diff
+diff x:0
+diff y:-1
+rotating diff
+diff x:-1
+diff y:0
+rotating diff
+diff x:0
+diff y:1
+rotating diff
+diff x:1
+diff y:0
+rotating diff
+diff x:0
+diff y:-1
+rotating diff
+diff x:-1
+diff y:0
+rotating diff
+diff x:0
+diff y:1
+rotating diff
+diff x:1
+diff y:0
+rotating diff
+diff x:-1
+diff y:0
+rotating diff
+diff x:0
+diff y:-1
+rotating diff
+diff x:1
+diff y:0
+rotating diff
+diff x:0
+diff y:1
+killed tet:O
+current bag
+O
+O
+O
+O
+O
+O
 popped tet:O
 killed tet:O
 current bag
-J
-L
-S
-I
 O
-T
-S
-J
-Z
-L
-I
-popped tet:S
-killed tet:S
-current bag
-J
-L
-I
 O
-T
-S
-J
-Z
-L
-I
-popped tet:I
-killed tet:I
-current bag
-J
-L
 O
-T
-S
-J
-Z
-L
-I
+O
+O
 popped tet:O
 killed tet:O
 current bag
-J
-L
-T
-S
-J
-Z
-L
-I
-popped tet:T
-killed tet:T
-current bag
-J
-L
-S
-J
-Z
-L
-I
-popped tet:S
-killed tet:S
-current bag
-J
-L
-J
-Z
-L
-I
-popped tet:J
-killed tet:J
-current bag
-J
-L
-Z
-L
-I
-popped tet:Z
-killed tet:Z
-current bag
-J
-L
-L
-I
 O
-Z
-S
-I
-J
-L
-T
-popped tet:L
-killed tet:L
-current bag
-J
-L
-I
 O
-Z
-S
-I
-J
-L
-T
-popped tet:I
-killed tet:I
-current bag
-J
-L
 O
-Z
-S
-I
-J
-L
-T
+O
+O
+O
+O
+O
+O
+O
+O
 popped tet:O
 killed tet:O
 current bag
-J
-L
-Z
-S
-I
-J
-L
-T
-popped tet:Z
-killed tet:Z
-current bag
-J
-L
-S
-I
-J
-L
-T
-popped tet:S
-killed tet:S
-current bag
-J
-L
-I
-J
-L
-T
-popped tet:I
-killed tet:I
-current bag
-J
-L
-J
-L
-T
-popped tet:J
-killed tet:J
-current bag
-J
-L
-L
-T
-Z
-L
-I
-J
-S
 O
-T
-popped tet:L
-killed tet:L
-current bag
-J
-L
-T
-Z
-L
-I
-J
-S
 O
-T
-popped tet:T
-killed tet:T
-current bag
-J
-L
-Z
-L
-I
-J
-S
 O
-T
-popped tet:Z
-killed tet:Z
-current bag
-J
-L
-L
-I
-J
-S
 O
-T
-popped tet:L
-killed tet:L
-current bag
-J
-L
-I
-J
-S
 O
-T
-popped tet:I
-killed tet:I
-current bag
-J
-L
-J
-S
 O
-T
-popped tet:J
-killed tet:J
-current bag
-J
-L
-S
 O
-T
-popped tet:S
-killed tet:S
-current bag
-J
-L
 O
-T
-L
 O
-J
-Z
-I
-S
-T
+O
 popped tet:O
 killed tet:O
 current bag
-J
-L
-T
-L
 O
-J
-Z
-I
-S
-T
-popped tet:T
-killed tet:T
-current bag
-J
-L
-L
 O
-J
-Z
-I
-S
-T
-popped tet:L
-killed tet:L
-current bag
-J
-L
 O
-J
-Z
-I
-S
-T
+O
+O
+O
+O
+O
+O
 popped tet:O
-killed tet:O
-current bag
-J
-L
-J
-Z
-I
-S
-T
-popped tet:J
-killed tet:J
-current bag
-J
-L
-Z
-I
-S
-T
-popped tet:Z
-killed tet:Z
-current bag
-J
-L
-I
-S
-T
-popped tet:I
-killed tet:I
-current bag
-J
-L
-S
-T
-S
-T
-I
-O
-L
-J
-Z
-popped tet:S
-killed tet:S
-current bag
-J
-L
-T
-S
-T
-I
-O
-L
-J
-Z
-popped tet:T

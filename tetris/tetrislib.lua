@@ -49,8 +49,28 @@ total_lines = 0
 
 board = {}
 
-Tetromino = {sprite = 0, cs=1, shape={}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
+Tetromino = {sprite = 0, cs=1, shape={}, offsets = {}, x=x0, y=y0, idx=1, idy=1, name='', flipx=false, flipy=false, alive=1, color=0} 
 Tetromino.__index = Tetromino
+
+default_offsets = { {{0,0}, {0,0}, {0,0}, {0,0}, {0,0}},
+                    {{0,0}, {1,0}, {1,-1}, {0,2}, {1,2}},
+                    {{0,0}, {0,0}, {0,0}, {0,0}, {0,0}},
+                    {{0,0}, {-1,0}, {-1,-1}, {0,2}, {-1,2}},
+                    }
+
+
+i_offsets = { {{0,0}, {-1,0}, {2,0}, {-1,0}, {2,0}},
+              {{-1,0}, {0,0}, {0,0}, {0,1}, {0,-2}},
+              {{-1,1}, {1,1}, {-2,1}, {1,0}, {-2,0}},
+              {{0,1}, {0,1}, {0,1}, {0,-1}, {0,2}},
+            }
+
+o_offsets = { {{0,0}},
+              {{0,-1}},
+              {{-1,-1}},
+              {{-1,0}},
+            }
+
 
 function log(text, ow)
     printh(text, "log", ow)
@@ -121,6 +141,7 @@ function Tetromino:new_I()
             {{3,1}, {3,2}, {3,3}, {3,4}},
             {{1,2}, {2,2}, {3,2}, {4,2}},
             }, color=12})
+    I.offsets = i_offsets
     I.idx = 4
     I.idy = -1
     return I
@@ -129,10 +150,11 @@ end
 function Tetromino:new_O()
     O = Tetromino:new({name = "O", sprite = 3,
     shape={ {{1,2}, {1,3}, {2,2}, {2,3}},
-            {{1,2}, {1,3}, {2,2}, {2,3}},
-            {{1,2}, {1,3}, {2,2}, {2,3}},
-            {{1,2}, {1,3}, {2,2}, {2,3}},
+            {{2,2}, {2,3}, {3,2}, {3,3}},
+            {{2,1}, {2,2}, {3,1}, {3,2}},
+            {{1,1}, {1,2}, {2,1}, {2,2}},
             }, color=10})
+    O.offsets = o_offsets
     O.idx = 4
     O.idy = -1
     return O
@@ -145,6 +167,7 @@ function Tetromino:new_J()
             {{2,1}, {2,2}, {2,3}, {3,3}},
             {{1,2}, {2,2}, {3,2}, {3,1}},  
             }, color=1})
+    J.offsets = default_offsets
     J.idx = 4
     J.idy = -1
     return J
@@ -157,6 +180,7 @@ function Tetromino:new_L()
             {{2,1}, {2,2}, {2,3}, {3,1}},
             {{1,1}, {1,2}, {2,2}, {3,2}},      
             }, color=9})
+    L.offsets = default_offsets
     L.idx = 4
     L.idy = -1
     return L
@@ -169,6 +193,7 @@ function Tetromino:new_S()
             {{2,2}, {2,3}, {3,1}, {3,2}},
             {{1,1}, {2,1}, {2,2}, {3,2}},  
             }, color=11})
+    S.offsets = default_offsets
     S.idx = 4
     S.idy = -1
     return S
@@ -181,6 +206,7 @@ function Tetromino:new_Z()
             {{2,1}, {2,2}, {3,2}, {3,3}},
             {{1,2}, {2,1}, {2,2}, {3,1}}, 
          }, color=8})
+    Z.offsets = default_offsets
     Z.idx = 4
     Z.idy = -1
     return Z
@@ -193,6 +219,7 @@ function Tetromino:new_T()
             {{2,1}, {2,2}, {2,3}, {3,2}},
             {{1,2}, {2,1}, {2,2}, {3,2}}, 
          }, color=14})
+    T.offsets = default_offsets
     T.idx = 4
     T.idy = -1
     return T
@@ -203,16 +230,14 @@ end
 function init_tetrominoes()
 
     Tetromino.__index = Tetromino
-
-
     
     tet_list = {}
     
     insert_tet_bag(tet_list)
-    log("initial bag")
-    for i=1, #tet_list,1 do
-        log(tet_list[i].name)
-    end
+    -- log("initial bag")
+    -- for i=1, #tet_list,1 do
+    --     log(tet_list[i].name)
+    -- end
 
     dead_tets = {}
 end
@@ -220,15 +245,7 @@ end
 
 
 function Tetromino:draw()
-    --spr(self.sprite, self.x, self.y, 2, 2, self.flipx , self.flipy)
     spr(self.sprite, self.x, board[self.idy][self.idx].y, 2, 2, self.flipx , self.flipy)
-    -- for i=1, 4 do
-    --     a = self.shape[i][2] - 1 + self.x
-    --     b = self.shape[i][1] - 1 + board[self.idy][self.idx].y
-
-    --     pset(a,b, 15)
-    -- end
-
 end
 
 
@@ -304,10 +321,34 @@ function Tetromino:rotate(clockwise)
     if next_rot == 5 then next_rot = 1 end
     if next_rot == 0 then next_rot = 4 end
 
+    try_limit = 5
+    if self.name == 'O' then
+        try_limit = 1
+    end
+    -- log(self.offsets)
+    -- for j=1, #self.offsets do
+    --     for k=1, #self.offsets[j] do
+    --         log(self.offsets[j][k][1])
+    --         log(self.offsets[j][k][2])
+    --     end
+    -- end
+
+    --log("offset 0 count: ".. try_limit)
 
     if self.alive == 1 then
-        if not self:check_collision(next_rot, self.idx, self.idy) then
-            self.cs= next_rot
+        for i = 1, try_limit do
+            current_offset = self.offsets[self.cs][i]
+            next_offset =self.offsets[next_rot][i]
+            diff = {current_offset[1] - next_offset[1], current_offset[2]- next_offset[2]}
+            log("rotating diff")
+            log("diff x:"..diff[1])
+            log("diff y:"..diff[2])
+            if not self:check_collision(next_rot, self.idx+diff[1], self.idy-diff[2]) then
+                self.cs= next_rot
+                self.idx += diff[1]
+                self.idy -= diff[2]
+                break
+            end
         end
     end
 
@@ -433,6 +474,7 @@ function insert_tet_bag(tet_list)
 
     for i = 1, 7 do
         rd = bag[i]
+
         if rd == 0 then t = Tetromino:new_I()
         elseif rd == 1 then t = Tetromino:new_O() 
         elseif rd == 2 then t = Tetromino:new_J() 
