@@ -1,9 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+
+--#include tetrismain.lua
 #include tetrislib.lua
-
-
 
 function _init()
     pokes()
@@ -13,15 +13,21 @@ function _init()
     init_tetrominoes()
     current_tet = pop_tet(tet_list)
     running = 1
+    timer = 0
+    timer_aux = 0
 
 end
 
-test = 0
+
 function _update()
-    test += 1
-    if (test==60) then
-        test = 0
+    if(timer_aux == 30) then
+        timer_aux = 0
+        timer += 1
     end
+    log("gravity buffer limit: "..gravity_buffer_limit, true)
+    log("coyote buffer limit: "..coyote_buffer_limit)
+    timer_aux += 1
+
     player_input()
 
     if running then
@@ -33,8 +39,7 @@ end
 function _draw()
     cls()
     if running==1 then
-        print(test,100,100)
-								map()
+		map()
         g_frames +=1
         --draw_borders(thickness,7)
         draw_board(false)
@@ -42,7 +47,8 @@ function _draw()
         current_tet:draw_tet()
         draw_tet_buffer(tet_list)
         print("lines:"..total_lines.."", x_tbf, y_tbf+30, 6)
-        if clear_anim.clearing then anim_clear() end
+        print("timer:"..timer, x_tbf, y_tbf+40, 6)
+        --if clear_anim.clearing then anim_clear() end
         if g_frames==30 then g_frames=0 end
         draw_borders(thickness,7)
     elseif running==0 then
@@ -130,6 +136,8 @@ function pokes()
     poke(0X5F5C, das) 
     poke(0X5F5D, arr) 
 end
+
+
 
 __gfx__
 000000004400404404440440004000000400000000000000000000000000000000000000cccccccccccccccc0000bbbbbbbb0000888888880000000000000000

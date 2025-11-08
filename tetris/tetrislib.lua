@@ -20,10 +20,12 @@ ghost = {}
 
 --gravity
 gravity_buffer = 0
+gravity_buffer_limit = 30
 default_g_force = 1
 high_g = 31
 g_force = default_g_force
 coyote_buffer = 0
+coyote_buffer_limit = 15
 
 right_buffer=0
 right_force=6
@@ -46,6 +48,7 @@ g_frames=0
 running = 0
 
 total_lines = 0
+twenty_lines = 0
 
 board = {}
 
@@ -234,10 +237,7 @@ function init_tetrominoes()
     tet_list = {}
     
     insert_tet_bag(tet_list)
-    -- log("initial bag")
-    -- for i=1, #tet_list,1 do
-    --     log(tet_list[i].name)
-    -- end
+
 
     dead_tets = {}
 end
@@ -325,24 +325,13 @@ function Tetromino:rotate(clockwise)
     if self.name == 'O' then
         try_limit = 1
     end
-    -- log(self.offsets)
-    -- for j=1, #self.offsets do
-    --     for k=1, #self.offsets[j] do
-    --         log(self.offsets[j][k][1])
-    --         log(self.offsets[j][k][2])
-    --     end
-    -- end
-
-    --log("offset 0 count: ".. try_limit)
 
     if self.alive == 1 then
         for i = 1, try_limit do
             current_offset = self.offsets[self.cs][i]
             next_offset =self.offsets[next_rot][i]
             diff = {current_offset[1] - next_offset[1], current_offset[2]- next_offset[2]}
-            log("rotating diff")
-            log("diff x:"..diff[1])
-            log("diff y:"..diff[2])
+
             if not self:check_collision(next_rot, self.idx+diff[1], self.idy-diff[2]) then
                 self.cs= next_rot
                 self.idx += diff[1]
@@ -358,18 +347,13 @@ end
 function Tetromino:gravity(force, lower_bound)
     if self.alive==1 then
         gravity_buffer+=force
-        if(gravity_buffer>30) then
+        if(gravity_buffer>gravity_buffer_limit) then
             if self.idy == 20 or self:check_collision(self.cs,self.idx, self.idy+1) then
                 coyote_buffer+=1
-                if (coyote_buffer>=15) then
+                if (coyote_buffer>=coyote_buffer_limit) then
                     self:kill_tet()
                     if running==1 then 
                         current_tet = pop_tet(tet_list)
-                        -- if current_tet:check_collision(current_tet.cs, current_tet.idx,current_tet.idy+1) then
-                        --     running = 0
-                        --     log("game over")
-                        --     return
-                        -- end
                     end
                     if running==0 then return end
                     coyote_buffer = 0
@@ -440,7 +424,6 @@ function Tetromino:kill_tet()
         if not contains(rows,b) then add(rows,b) end
     end
     check_rows(rows)
-    log("killed tet:"..self.name)
 end
 
 function insert_tet(tet_list) --inserts a new random tetromino at tet_list[index]
@@ -468,7 +451,7 @@ function insert_tet_bag(tet_list)
     for i = 7,1,-1 do
         rd = flr(rnd(7))+1
         tmp = bag[i]
-        bag[i] = bag[rd] 
+        bag[i] = bag[rd]
         bag[rd] = tmp
     end
 
@@ -491,13 +474,9 @@ function pop_tet(tet_list)  -- inserts + pops a tet from the list
     if (count(tet_list) <= 4) then
         insert_tet_bag(tet_list)
     end
-    log("current bag")
-    for i=1, #tet_list do
-        log(tet_list[i].name)
-    end
 
     var = deli(tet_list,3)
-    log("popped tet:"..var.name)
+
     return var
 end
 
@@ -535,8 +514,16 @@ function draw_tet_buffer(tet_list)
 end
 
 
-function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear das ultimas N linhas
+function clear_rows(rows, n) 
     total_lines += n
+    twenty_lines +=n
+    if(twenty_lines >= 20) then
+        twenty_lines = 0
+        if(gravity_buffer_limit >= 10) then
+            gravity_buffer_limit -= 4
+            --coyote_buffer_limit -=1
+        end
+    end
     last_row = rows[1]
     --send last row and n to global variables to animate
     for r=last_row,n+1,-1 do
@@ -551,6 +538,8 @@ function clear_rows(rows, n) -- é preciso modificar esta funçao para dar clear
             board[rn][j].color= 0 
         end
     end
+
+    
 end
 
 function reset_board()
@@ -561,6 +550,7 @@ function reset_board()
         end
     end
     total_lines = 0
+    twenty_lines = 0
 end
 
 function Tetromino:check_collision(cs, new_idx, new_idy)
