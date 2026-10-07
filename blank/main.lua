@@ -19,6 +19,7 @@ adjacent = {{-1,0}, {1,0}, {0,-1},{0,1}}
 
 placed_marks = 0
 
+turn = 0
 
 function _init()
     menuitem(1, "god mode", function() if mode ~= "god" then mode = "god" else mode = "move" end end)
@@ -27,6 +28,8 @@ function _init()
     bag.count = 4
     bag.idx = 1
     bag.current_mark = bag[bag.idx]
+
+    fill_grid()
 end
 
 function _update()
@@ -35,23 +38,24 @@ end
 
 function _draw()
     cls()
-    rect(0,0,127,127)
+    rect(0,0,127,127,5)
     draw_grid()
     draw_cursor()
     draw_bag()
-    print(mode,110,2)
+    print(mode,110,2,5)
     if mode == "move" then
-        print("z -> advance turn", 2,114)
-        print("x -> mark mode", 2,120)
+        print("z -> advance turn", 2,114,5)
+        print("x -> mark mode", 2,120,5)
     elseif mode =="mark" then
-        print("z -> place mark", 2,114)
-        print("x -> move mode", 2,120)
+        print("z -> place mark", 2,114,5)
+        print("x -> move mode", 2,120,5)
     elseif mode == "god" then
-        print("z -> clear grid", 2,114)
+        print("z -> clear grid", 2,114,5)
         -- print("x -> move mode", 2,120)
-        print("x -> fill grid", 2, 120)
+        print("x -> fill grid", 2, 120,5)
     end
-    print("marks:"..placed_marks, 2, 2)
+    print("turn:"..turn, 2, 2,5)
+    print("marks:"..placed_marks, 40, 2,5)
 end
 
 function handle_input()
@@ -73,6 +77,14 @@ function handle_input()
             end
             bag.current_mark = bag[bag.idx]
         end
+        if btnp(⬅️) then 
+            if (bag.idx > 1) then
+                bag.idx -= 1
+            else
+                bag.idx = bag.count
+            end
+            bag.current_mark = bag[bag.idx]
+        end
     elseif mode=="god" then
         if btnp(4) then clear_grid() end
         -- if btnp(5) then mode = "move" end
@@ -83,6 +95,7 @@ end
 
 function advance_turn()
     update_board()
+    turn+=1
 end
 
 function try_place_mark(i,j,mark)
@@ -90,7 +103,20 @@ function try_place_mark(i,j,mark)
         grid[i][j].mark = mark
         grid[i][j].sprite = get_sprite(mark)
         placed_marks +=1 
+        return true
     end
+    return false
+end
+
+function try_spawn_mark(i,j,mark)
+    if grid[i][j].mark == "none" and grid[i][j].spawning then
+        grid[i][j].mark = mark
+        grid[i][j].sprite = get_sprite(mark)
+        placed_marks +=1 
+        grid[i][j].spawning = false
+        return true
+    end
+    return false
 end
 
 
@@ -102,7 +128,7 @@ function create_grid()
         for j=1, grid_size do
             x = margin + (i-1)*grid_px_size*grid_px_scale + spacing*i
             y = margin + (j-1)*grid_px_size*grid_px_scale + spacing*j
-            grid[i][j]={id = id, sprite=0, x0=x, y0=y, mark="none", exploding=false}
+            grid[i][j]={id = id, sprite=0, x0=x, y0=y, mark="none", exploding=false, spawning = false}
             id+=1
         end
     end
@@ -118,13 +144,14 @@ end
 function fill_grid()
     for i=1, grid_size do
         for j=1, grid_size do
-            roll = flr(rnd(4))
+            roll = flr(rnd(5))
             if roll==0 then current_mark = "red" end 
             if roll==1 then current_mark = "blue" end
             if roll==2 then current_mark = "yellow" end
             if roll==3 then current_mark = "green" end
+            if roll==4 then current_mark = "none" end
             grid[i][j].mark = current_mark
-            grid[i][j].sprite = get_sprite(current_mark)
+            if current_mark ~= "none" then grid[i][j].sprite = get_sprite(current_mark) end
         end
     end
 end
@@ -132,21 +159,38 @@ end
 function clear_grid()
     for i=1, grid_size do
         for j=1, grid_size do
-            grid[i][j].mark = nil
+            grid[i][j].mark = "none"
+            grid[i][j].sprite = blank_cell.sprite
         end
     end
     placed_marks = 0
+    turn = 0
 end
 
 function update_board()
     for i=1, grid_size do
         for j=1, grid_size do
-            if grid[i][j].mark == "red" then update_red_mark(i,j) end
             if grid[i][j].mark == "blue" then update_blue_mark(i,j) end
+        end
+    end
+
+    trigger_explosions()
+
+    for i=1, grid_size do
+        for j=1, grid_size do
+            if grid[i][j].mark == "red" then update_red_mark(i,j) end
+        end
+    
+    end
+    trigger_explosions()
+
+    for i=1, grid_size do
+        for j=1, grid_size do
             if grid[i][j].mark == "green" then update_green_mark(i,j) end
         end
     end
-    trigger_explosions()
+
+    trigger_spawns()
 end
 
 
@@ -155,7 +199,7 @@ end
 function update_red_mark(i,j)
     
     for _,delta in ipairs(adjacent) do
-        if i+delta[1] > 0 and i+delta[1] < grid_size and j+delta[2] > 0 and j+delta[2] < grid_size then
+        if i+delta[1] > 0 and i+delta[1] <= grid_size and j+delta[2] > 0 and j+delta[2] <= grid_size then
             if grid[i+delta[1]][j+delta[2]].mark == "red" then
                 grid[i+delta[1]][j+delta[2]].exploding = true
                 grid[i][j].exploding = true
@@ -194,7 +238,7 @@ function update_blue_mark(i,j)
     grid[i][j].exploding = true
 
     for _,delta in ipairs(adjacent) do
-        if i+delta[1] > 0 and i+delta[1] < grid_size and j+delta[2] > 0 and j+delta[2] < grid_size then
+        if i+delta[1] > 0 and i+delta[1] <= grid_size and j+delta[2] > 0 and j+delta[2] <= grid_size then
             if grid[i+delta[1]][j+delta[2]].mark ~= "none" and not grid[i+delta[1]][j+delta[2]].exploding then
                 grid[i][j].exploding = false
             end
@@ -206,17 +250,28 @@ end
 
 function update_green_mark(i,j)
 
+    log("updating green")
     for _,delta in ipairs(adjacent) do
-        if i+delta[1] > 0 and i+delta[1] < grid_size and j+delta[2] > 0 and j+delta[2] < grid_size then
+        log(delta)
+        if i+delta[1] > 0 and i+delta[1] <= grid_size and j+delta[2] > 0 and j+delta[2] <= grid_size then
             if grid[i+delta[1]][j+delta[2]].mark == "none" then
-                try_place_mark(i+delta[1],j+delta[2], "green")
+                grid[i+delta[1]][j+delta[2]].spawning = true 
+                return
             end
         end
     end
 
+    log("")
 
 end
 
+function trigger_spawns()
+    for i=1, grid_size do
+        for j=1, grid_size do
+            try_spawn_mark(i,j,"green") 
+        end
+    end
+end
 
 function trigger_explosions()
     for i=1, grid_size do
@@ -244,42 +299,66 @@ function draw_cursor()
     sspr(8,0,grid_px_size,grid_px_size,grid[crs.i][crs.j].x0,grid[crs.i][crs.j].y0, grid_px_size*grid_px_scale,grid_px_size*grid_px_scale)
 end
 
+-- function draw_bag()
+--     local i = 1
+--     local mark_sprite = 1
+--     local xx = grid[1][1].x0
+--     local yy = margin + grid_size*grid_px_size*grid_px_scale + spacing*(grid_size+1)
+--     local diff = grid_px_size*grid_px_scale
+--     rect(xx, yy, xx + diff - 1, yy + diff - 1, 6)
+--     rect(xx+diff+spacing, yy, xx + 2 * diff - 1 + spacing, yy + diff - 1, 5)
+--     rect(xx+2*(diff+spacing), yy, xx + 3 * diff - 1 + 2*spacing, yy + diff - 1, 5)
+--     rect(xx+3*(diff+spacing), yy, xx + 4 * diff - 1 + 3*spacing, yy + diff - 1, 5)
+
+--     if bag[i] == "red" then mark_sprite = 2 end
+--     if bag[i] == "blue" then mark_sprite = 3 end
+--     if bag[i] == "yellow" then mark_sprite = 4 end
+--     if bag[i] == "green" then mark_sprite = 5 end
+
+--     sspr(xx)
+
+--     for i=1,4 do
+--         color = (i==1) and 6 or 5
+--         rect(xx + (i-1) * (diff+spacing) , yy, xx + i * diff + (i-1) * spacing - 1, yy + diff - 1, color)
+
+--         local index = (bag.idx+i-2)%4+1
+        
+--         if bag[index] == "red" then mark_sprite = 2 end
+--         if bag[index] == "blue" then mark_sprite = 3 end
+--         if bag[index] == "yellow" then mark_sprite = 4 end
+--         if bag[index] == "green" then mark_sprite = 5 end
+        
+--         sspr(mark_sprite*grid_px_size, 0, 8, 8, xx + (i-1) * (diff+spacing) , yy,diff,diff )
+        
+--     end
+    
+-- end
+
 function draw_bag()
     local i = 1
     local mark_sprite = 1
     local xx = grid[1][1].x0
     local yy = margin + grid_size*grid_px_size*grid_px_scale + spacing*(grid_size+1)
     local diff = grid_px_size*grid_px_scale
-    rect(xx, yy, xx + diff - 1, yy + diff - 1, 6)
+    rect(xx, yy, xx + diff - 1, yy + diff - 1, 5)
     rect(xx+diff+spacing, yy, xx + 2 * diff - 1 + spacing, yy + diff - 1, 5)
     rect(xx+2*(diff+spacing), yy, xx + 3 * diff - 1 + 2*spacing, yy + diff - 1, 5)
     rect(xx+3*(diff+spacing), yy, xx + 4 * diff - 1 + 3*spacing, yy + diff - 1, 5)
 
-    if bag[i] == "red" then mark_sprite = 2 end
-    if bag[i] == "blue" then mark_sprite = 3 end
-    if bag[i] == "yellow" then mark_sprite = 4 end
-    if bag[i] == "green" then mark_sprite = 5 end
-
-    sspr(xx)
-
-    for i=1,4 do
-        color = (i==1) and 6 or 5
-        rect(xx + (i-1) * (diff+spacing) , yy, xx + i * diff + (i-1) * spacing - 1, yy + diff - 1, color)
-
-        local index = (bag.idx+i-2)%4+1
-        
-        if bag[index] == "red" then mark_sprite = 2 end
-        if bag[index] == "blue" then mark_sprite = 3 end
-        if bag[index] == "yellow" then mark_sprite = 4 end
-        if bag[index] == "green" then mark_sprite = 5 end
-        
-        sspr(mark_sprite*grid_px_size, 0, 8, 8, xx + (i-1) * (diff+spacing) , yy,diff,diff )
-        
-    end
     
+    for i=1,4 do
+        color = (i==bag.idx) and 6 or 5
+
+        local index = get_sprite(bag[i])
+        rect(xx + (i-1) * (diff+spacing) , yy, xx + i * diff + (i-1) * spacing - 1, yy + diff - 1, color)
+        sspr(index*grid_px_size, 0, 8, 8, xx + (i-1) * (diff+spacing) , yy,diff,diff )
+    end
+
+
+
 end
 
-function zip(a,b)
-
-
+function log(txt, ow)
+    ow = ow or false 
+    printh(txt,'debug.txt',ow)
 end
